@@ -1,6 +1,6 @@
 import './App.css';
 import Playmat from "./playmatsCustom.jsx";
-import Shirt from "./ShirtCustom.jsx";
+import Shirt from "./shirtCustomScript.jsx";
 
 function App() {
   const PlaymatOn = false;
