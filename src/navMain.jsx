@@ -33,7 +33,7 @@ export default function NavMain({ onGoHome, onGoMain, onGoPlaymats, onGoContact,
   return (
     <header ref={navRef} className="navbar" style={{ opacity: 0 }}>
       <div className="navbar-brand" onClick={onGoHome} style={{ cursor: "pointer" }}>
-        <h2>🐨 SAD KOALA</h2>
+        <h2>SAD KOALA STUDIO</h2>
       </div>
       
       <nav className="navbar-links">

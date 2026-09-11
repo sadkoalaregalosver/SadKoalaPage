@@ -3,9 +3,9 @@ import { createClient } from "@supabase/supabase-js";
 import "./mainPage.css";
 
 // Reemplaza con tus imágenes de banner locales si ya las tienes
-import banner1 from "./assets/banner1.png";
-import banner2 from "./assets/banner2.png";
-import banner3 from "./assets/banner3.png";
+import banner1 from "./assets/banner1.jpg";
+import banner2 from "./assets/banner2.jpg";
+import banner3 from "./assets/banner3.jpg";
 
 // Instancia de Supabase por si se carga de forma independiente
 const supabase = createClient("https://wnezxpgkymojzotrzcmc.supabase.co", "sb_publishable_GWwMGvh0jiuJKxlV_EXnrA_q-yk3899");
