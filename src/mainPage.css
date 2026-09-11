@@ -1,0 +1,99 @@
+.main-reel-container {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  overflow: hidden;
+  background-color: #111;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+
+}
+
+.reel-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  opacity: 0;
+  transition: opacity 0.8s ease-in-out;
+  display: flex;
+  align-items: center;
+}
+
+.reel-slide.active {
+  opacity: 1;
+  z-index: 2;
+}
+
+.reel-overlay {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, rgba(10, 10, 15, 0.9) 0%, rgba(10, 10, 15, 0.4) 60%, transparent 100%);
+  display: flex;
+  align-items: center;
+  padding: 0 5%;
+}
+
+.reel-content {
+  max-width: 500px;
+  color: #fff;
+  z-index: 3;
+}
+
+.reel-content h1 {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.reel-content p {
+  font-size: 1.1rem;
+  color: #d4d4d8;
+  margin-bottom: 20px;
+}
+
+.reel-btn {
+  padding: 12px 24px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+}
+
+.reel-btn:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.reel-dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8px;
+  z-index: 10;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+.dot.active-dot {
+  background-color: #007bff;
+  transform: scale(1.2);
+}

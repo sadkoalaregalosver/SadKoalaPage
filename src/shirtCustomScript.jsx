@@ -12,7 +12,13 @@ export default function ShirtCustom({ initialProduct, onBackToCatalog }) {
   const [shirtColor, setShirtColor] = useState("#3b82f6");
   const [errorMessage, setErrorMessage] = useState(null);
 
-  // Referencia y estados para controlar el arrastre del scroll con el mouse
+  // Estado para las 4 opciones del menú inferior
+  const [recommendedModels, setRecommendedModels] = useState([]);
+  
+  // Bandera para fijar las recomendaciones solo la primera vez que se abre la vista
+  const hasInitializedRecommendations = useRef(false);
+
+  // Referencia y estados para el arrastre del scroll con el mouse
   const scrollContainerRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -26,6 +32,21 @@ export default function ShirtCustom({ initialProduct, onBackToCatalog }) {
     { name: "Green", hex: "#22c55e" },
     { name: "Yellow", hex: "#eab308" },
   ];
+
+  // Función robusta para parsear 'keys' sin importar si viene como array, string plano o JSON de Supabase
+  const parseKeys = (rawKeys) => {
+    if (!rawKeys) return [];
+    if (Array.isArray(rawKeys)) return rawKeys;
+    if (typeof rawKeys === "string") {
+      try {
+        const parsed = JSON.parse(rawKeys);
+        if (Array.isArray(parsed)) return parsed;
+      } catch {
+        return rawKeys.replace(/[{}]/g, "").split(",").map((k) => k.trim());
+      }
+    }
+    return [];
+  };
 
   const formatColors = (itemColors) => {
     return itemColors
@@ -59,17 +80,18 @@ export default function ShirtCustom({ initialProduct, onBackToCatalog }) {
           id: item.id,
           name: item.name || "Sin nombre",
           image: item.image_url,
+          colors: item.colors,
+          keys: parseKeys(item.keys), // 👈 Usamos el parseador seguro aquí
           allowedColors: formatColors(item.colors),
           height: item.height
         }));
 
         setShirtModels(formatted);
 
-        if (!selectedModel && formatted.length > 0) {
-          setSelectedModel(formatted[0]);
-        } else if (initialProduct) {
-          const matched = formatted.find(m => m.id === initialProduct.id);
-          if (matched) setSelectedModel(matched);
+        const targetProduct = initialProduct || formatted[0];
+        if (targetProduct) {
+          const matched = formatted.find(m => m.id === targetProduct.id) || targetProduct;
+          setSelectedModel(matched);
         }
       } catch (err) {
         setErrorMessage(`Fallo de conexión: ${err.message}`);
@@ -78,6 +100,33 @@ export default function ShirtCustom({ initialProduct, onBackToCatalog }) {
 
     fetchShirts();
   }, []);
+
+  // Genera las 4 recomendaciones una sola vez usando 'keys' (prioriza por coincidencia y rellena al azar)
+  useEffect(() => {
+    if (!selectedModel || shirtModels.length === 0 || hasInitializedRecommendations.current) return;
+
+    const baseProduct = initialProduct || selectedModel;
+    const others = shirtModels.filter((m) => m.id !== baseProduct.id);
+    const baseKeys = parseKeys(baseProduct.keys);
+
+    // Filtra las que comparten al menos una clave en el arreglo 'keys' (comparación insensible a mayúsculas/minúsculas)
+    const matchedByKeys = others.filter((m) => {
+      const mKeys = parseKeys(m.keys);
+      if (mKeys.length === 0) return false;
+      return mKeys.some((k) => 
+        baseKeys.some((bk) => String(bk).trim().toLowerCase() === String(k).trim().toLowerCase())
+      );
+    });
+
+    // Si no hay suficientes por coincidencia, el resto se completa de forma totalmente al azar
+    const remaining = others.filter((m) => !matchedByKeys.includes(m));
+    const shuffledRemaining = [...remaining].sort(() => 0.5 - Math.random());
+
+    const combined = [...matchedByKeys, ...shuffledRemaining];
+    
+    setRecommendedModels(combined.slice(0, 4));
+    hasInitializedRecommendations.current = true;
+  }, [shirtModels, initialProduct, selectedModel]);
 
   useEffect(() => {
     if (selectedModel) {
@@ -174,7 +223,6 @@ export default function ShirtCustom({ initialProduct, onBackToCatalog }) {
         <img src={shirtMockUp} alt="Playera Sombras" className="shirt-shadows" />
       </div>
 
-      {/* Selector de colores centrado debajo de la playera */}
       <div className="color-selector">
         {colors
           .filter((c) => {
@@ -195,7 +243,6 @@ export default function ShirtCustom({ initialProduct, onBackToCatalog }) {
           ))}
       </div>
 
-      {/* Menú de modelos con soporte de arrastre */}
       <div 
         className="models-scroll-menu"
         ref={scrollContainerRef}
@@ -205,7 +252,7 @@ export default function ShirtCustom({ initialProduct, onBackToCatalog }) {
         onMouseMove={handleMouseMove}
         style={{ cursor: isDragging ? "grabbing" : "grab", userSelect: "none" }}
       >
-        {shirtModels.map((model) => (
+        {recommendedModels.map((model) => (
           <button
             key={model.id}
             onClick={() => setSelectedModel(model)}

@@ -1,0 +1,57 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #121214;
+  border-bottom: 1px solid #27272a;
+  color: #ffffff;
+  width: 100%;
+  box-sizing: border-box;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  height: 50px;
+}
+
+.navbar-brand h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.nav-link {
+  background: none;
+  border: none;
+  color: #a1a1aa;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+}
+
+.nav-link:hover {
+  color: #ffffff;
+  background-color: #27272a;
+}
+
+/* Estilo especial opcional para destacar el botón de pedidos */
+.nav-btn-order {
+  background-color: #3b82f6;
+  color: #ffffff;
+}
+
+.nav-btn-order:hover {
+  background-color: #2563eb;
+  color: #ffffff;
+}

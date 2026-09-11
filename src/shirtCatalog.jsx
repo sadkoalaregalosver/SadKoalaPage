@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createClient } from "@supabase/supabase-js";
+import { animate, stagger } from "animejs";
 import "./shirtCatalog.css";
 
 const supabase = createClient("https://wnezxpgkymojzotrzcmc.supabase.co", "sb_publishable_GWwMGvh0jiuJKxlV_EXnrA_q-yk3899");
@@ -9,6 +10,9 @@ export default function ShirtCatalog({ onSelectShirt, onClose }) {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+
+  const gridRef = useRef(null);
+  const hasAnimatedInitial = useRef(false);
 
   useEffect(() => {
     async function fetchCatalog() {
@@ -40,30 +44,53 @@ export default function ShirtCatalog({ onSelectShirt, onClose }) {
     fetchCatalog();
   }, []);
 
-  // 🚀 Lógica de filtrado por nombre y array de keywords de Supabase
+  // 🚀 Animación inicial (al abrir el catálogo por primera vez)
+  useEffect(() => {
+    if (!loading && gridRef.current && !hasAnimatedInitial.current) {
+      const cards = gridRef.current.querySelectorAll(".catalog-card");
+      if (cards.length > 0) {
+        hasAnimatedInitial.current = true;
+        animate(cards, {
+          translateY: [20, 0],
+          opacity: [0, 1],
+          scale: [0.98, 1],
+          duration: 400,
+          ease: "outExpo"
+        });
+      }
+    }
+  }, [loading, shirtModels]);
+
+  // 🚀 Animación en cascada "lenta" cada vez que se teclea algo en el buscador
+  useEffect(() => {
+    // Solo actúa si ya pasó la carga inicial y el usuario ha escrito algo
+    if (!loading && hasAnimatedInitial.current && searchTerm.trim() !== "") {
+      const cards = gridRef.current?.querySelectorAll(".catalog-card");
+      if (cards && cards.length > 0) {
+        animate(cards, {
+          translateY: [25, 0],
+          opacity: [0, 1],
+          scale: [0.95, 1],
+          delay: stagger(60, { start: 30 }), // Retraso escalonado para que aparezcan de forma secuencial y lenta
+          duration: 500,
+          ease: "outExpo"
+        });
+      }
+    }
+  }, [searchTerm, loading]);
+
   const filteredShirts = shirtModels.filter((item) => {
     const term = searchTerm.toLowerCase().trim();
     if (!term) return true;
 
-    // Buscar coincidencia en el nombre
     const nameMatch = item.name && item.name.toLowerCase().includes(term);
-
-    // Buscar coincidencia dentro del arreglo de keywords (`text[]`)
     const keywordMatch = item.keywords && Array.isArray(item.keywords) && 
       item.keywords.some((kw) => kw && kw.toLowerCase().includes(term));
 
     return nameMatch || keywordMatch;
   });
 
-  if (loading) {
-    return (
-      <div className="catalog-modal-overlay">
-        <div className="catalog-modal-content">
-          <div className="catalog-loading">Cargando catálogo de playeras...</div>
-        </div>
-      </div>
-    );
-  }
+
 
   if (errorMessage) {
     return (
@@ -88,7 +115,6 @@ export default function ShirtCatalog({ onSelectShirt, onClose }) {
           <h1>Catálogo de Diseños</h1>
           <p>Elige tu diseño favorito para comenzar a personalizarlo</p>
 
-          {/* 🚀 Barra de Búsqueda Interactiva */}
           <div className="catalog-search-wrapper" style={{ marginTop: "15px" }}>
             <input
               type="text"
@@ -111,10 +137,16 @@ export default function ShirtCatalog({ onSelectShirt, onClose }) {
           </div>
         </header>
 
-        <div className="catalog-grid">
+        <div ref={gridRef} className="catalog-grid">
           {filteredShirts.length > 0 ? (
             filteredShirts.map((item) => (
-              <div key={item.id} className="catalog-card">
+              <div 
+                key={item.id} 
+                className="catalog-card" 
+                style={{ 
+                  opacity: (searchTerm.trim() === "" && hasAnimatedInitial.current) ? 1 : 0 
+                }}
+              >
                 <div className="catalog-image-wrapper">
                   <img src={item.image_url} alt={item.name} className="catalog-img" />
                 </div>
